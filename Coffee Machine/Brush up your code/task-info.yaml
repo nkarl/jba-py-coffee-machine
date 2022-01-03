@@ -256,6 +256,6 @@ files:
     if __name__ == '__main__':
         CoffeeMachineTest('machine.coffee_machine').run_tests()
   learner_created: false
-feedback_link: https://hyperskill.org/projects/68/stages/371/implement#comment
+feedback_link: https://hyperskill.org/learn/step/5795#comment
 status: Unchecked
 record: -1
