@@ -1,111 +1,92 @@
 # Write your code here
+import json
 import traceback
-import copy
+import os
 
-coffee_menu = {
-    '1': (
-        'espresso'  , {'water' : 250, 'milk' : 0, 'beans'   : 16, 'cups': 1, 'money' : 4}
-    ),
-    '2': (
-        'latte'     , {'water' : 350, 'milk' : 75, 'beans'  : 20, 'cups': 1, 'money' : 7}
-    ),
-    '3': (
-        'cappuccino', {'water' : 200, 'milk' : 100, 'beans' : 12, 'cups': 1, 'money' : 6}
-    )
-}
+if os.path.isdir('./machine'):
+    os.chdir('./machine')
+cwd = os.getcwd()
+cmenu = cwd + '/coffee_menu.json'
+st = cwd + '/stocks.json'
 
-supplies = {
-    'water': 400, 'milk': 540, 'beans': 120, 'cups': 9, 'money': 550
-}
+with open(cmenu) as c, open(st) as s:
+    coffees = json.load(c)
+    stocks = json.load(s)
 
 
-def make_coffee(coffee_type: dict):
-    for k in coffee_type:
-        if supplies[k] < coffee_type[k]:
-            print(f'Sorry, not enough {k}')
-            return
-    print('I have enough resources, making you a coffee!')
-    print()
-    for k in coffee_type:
-        if k == 'money':
-            supplies[k] += coffee_type[k]
-        else:
-            supplies[k] -= coffee_type[k]
+class CoffeeTransaction:
+
+    def __init__(self, coffees_json: dict, supplies_json: dict):
+        self.coffees = coffees_json
+        self.stocks = supplies_json
+        self.action_menu = {
+            'buy': self.buy,
+            'fill': self.fill,
+            'take': self.take,
+            'remaining': self.display_supplies,
+            'exit': exit
+        }
+
+    def make_coffee(self, coffee_type: dict):
+        for k in coffee_type:
+            if self.stocks[k] < coffee_type[k]:
+                print(f'Sorry, not enough {k}')
+                return
+        print('I have enough resources, making you a coffee!\n')
+        for k in coffee_type:
+            if k == 'money':
+                self.stocks[k] += coffee_type[k]
+            else:
+                self.stocks[k] -= coffee_type[k]
+
+    def buy(self):
+        print('What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu:')
+        try:
+            order = input()
+            if order == 'back':
+                return
+            # if order in self.coffees:
+            coffee = self.coffees.get(order)[1]
+            self.make_coffee(coffee)
+        except KeyError:
+            print(traceback.format_exc())
+
+    def fill(self):
+        self.stocks['water'] = self.stocks['water'] + \
+                               int(input('Write how many ml of water you want to add:\n'))
+        self.stocks['milk'] = self.stocks['milk'] + \
+                              int(input('Write how many ml of milk you want to add:\n'))
+        self.stocks['beans'] = self.stocks['beans'] + \
+                               int(input('Write how many grams of coffee beans you want to add:\n'))
+        self.stocks['cups'] = self.stocks['cups'] + \
+                              int(input('Write how many disposable cups you want to add:\n'))
+
+    def take(self):
+        print(f"I gave you ${self.stocks['money']}")
+        self.stocks['money'] = 0
+
+    def display_supplies(self):
+        print()
+        print('The coffee machine has:')
+        print(f"{self.stocks['water']} of water")
+        print(f"{self.stocks['milk']} of milk")
+        print(f"{self.stocks['beans']} of coffee beans")
+        print(f"{self.stocks['cups']} of disposable cups")
+        print(f"{self.stocks['money']} of money")
+        print()
+
+    def process_order(self, order: str):
+        self.action_menu.get(order)()
+
+    def update_database(self):
+        pass
 
 
-def buy():
-    # the user must choose one of the three types of coffee: espresso, latte, or cappuccino
-    print('What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu:')
-    try:
-        order = input()
-        if order in coffee_menu:
-            coffee = coffee_menu.get(order)[1]
-            make_coffee(coffee)
-    except KeyError:
-        print(traceback.format_exc())
-
-
-def fill():
-    supplies['water'] = supplies['water'] + int(input('Write how many ml of water you want to add:\n'))
-    supplies['milk']  = supplies['milk']  + int(input('Write how many ml of milk you want to add:\n'))
-    supplies['beans'] = supplies['beans'] + int(input('Write how many grams of coffee beans you want to add:\n'))
-    supplies['cups']  = supplies['cups']  + int(input('Write how many disposable cups you want to add:\n'))
-
-
-def take():
-    print(f"I gave you ${supplies['money']}")
-    supplies['money'] = 0
-
-
-def display_supplies():
-    print()
-    print('The coffee machine has:')
-    print(f"{supplies['water']} of water")
-    print(f"{supplies['milk']} of milk")
-    print(f"{supplies['beans']} of coffee beans")
-    print(f"{supplies['cups']} of disposable cups")
-    print(f"{supplies['money']} of money")
-    print()
-
-
-action_menu = {'buy': buy, 'fill': fill, 'take': take, 'remaining': display_supplies, 'exit': exit}
-
-
-def process_order(order: str):
-    action_menu.get(order)()
-
-
-def run_machine():
-    # display_supplies()
-    process_order(input('Write action (buy, fill, take, remaining, exit):\n'))
-    # display_supplies()
-
-
-def check_supplies():
-    unit_water = 200
-    unit_milk  = 50
-    unit_beans = 15
-
-    avail_water = int(input('Write how many ml of water the coffee machine has:\n'))
-    avail_milk  = int(input('Write how many ml of milk the coffee machine has:\n'))
-    avail_beans = int(input('Write how many grams of coffee beans the coffee machine has:\n'))
-    cups        = int(input('Write how many cups of coffee you will need:\n'))
-
-    tmp = [
-        avail_water // unit_water,
-        avail_milk  // unit_milk,
-        avail_beans // unit_beans
-    ]
-    max_cups = min(tmp)
-
-    if max_cups == cups:
-        print('Yes, I can make that amount of coffee')
-    elif max_cups > cups:
-        print(f'Yes, I can make that amount of coffee (and even {max_cups - cups} more than that')
-    else:
-        print(f'No, I can make only {max_cups} cups of coffee')
+def run_machine(user_instance: CoffeeTransaction):
+    user_instance.process_order(input('Write action (buy, fill, take, remaining, exit):\n'))
 
 
 if __name__ == '__main__':
+    instance = CoffeeTransaction(coffees, stocks)
     while True:
-        run_machine()
+        run_machine(instance)

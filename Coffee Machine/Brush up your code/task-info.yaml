@@ -256,6 +256,22 @@ files:
     if __name__ == '__main__':
         CoffeeMachineTest('machine.coffee_machine').run_tests()
   learner_created: false
+- name: machine/coffee_machineBAK
+  visible: true
+  learner_created: true
+- name: machine/base/__init__.py
+  visible: true
+  learner_created: true
+- name: machine/coffee_menu.json
+  visible: true
+  learner_created: true
+- name: machine/stocks.json
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/5795#comment
-status: Unchecked
-record: -1
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Mon, 03 Jan 2022 19:10:27 UTC
+record: 6
